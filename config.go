@@ -2,16 +2,21 @@ package main
 
 import (
 	"crypto/rand"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"strconv"
 
 	"github.com/deepch/vdk/av"
 )
 
 //Config global
 var Config = loadConfig()
+
+type Camera struct {
+	Id   uint32 `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	Url  string `json:"url,omitempty"`
+}
 
 //ConfigST struct
 type ConfigST struct {
@@ -36,18 +41,42 @@ type viwer struct {
 }
 
 func loadConfig() *ConfigST {
-	var tmp ConfigST
-	data, err := ioutil.ReadFile("config.json")
+
+	db, err := connectPg(getPgParam())
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
+	} else {
+		log.Println("Pg connected")
 	}
-	err = json.Unmarshal(data, &tmp)
+
+	// var tmp ConfigST
+	// data, err := ioutil.ReadFile("config.json")
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
+	// err = json.Unmarshal(data, &tmp)
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
+
+	tmp := ConfigST{
+		Server:  ServerST{HTTPPort: ":8083"},
+		Streams: make(map[string]StreamST),
+	}
+
+	var cameras []Camera
+
+	err = db.Select(&cameras, `select id, "name", url from smt_define_camera`)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
-	for i, v := range tmp.Streams {
-		v.Cl = make(map[string]viwer)
-		tmp.Streams[i] = v
+
+	for _, c := range cameras {
+		cl := make(map[string]viwer)
+		tmp.Streams[strconv.Itoa(int(c.Id))] = StreamST{
+			URL: c.Url,
+			Cl:  cl,
+		}
 	}
 	return &tmp
 }

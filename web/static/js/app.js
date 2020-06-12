@@ -2,7 +2,7 @@ let suuid = $('#suuid').val();
 
 let config = {
   iceServers: [{
-    urls: ["stun:stun.l.google.com:19302"]
+    urls: ["stun:localhost:3478"]
   }]
 };
 

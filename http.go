@@ -5,8 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"math/rand"
-	"net/http"
-	"sort"
+	"os"
 	"strings"
 	"time"
 
@@ -20,27 +19,27 @@ import (
 
 func serveHTTP() {
 	router := gin.Default()
-	router.LoadHTMLGlob("web/templates/*")
-	router.GET("/", func(c *gin.Context) {
-		fi, all := Config.list()
-		sort.Strings(all)
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"port":     Config.Server.HTTPPort,
-			"suuid":    fi,
-			"suuidMap": all,
-			"version":  time.Now().String(),
-		})
-	})
-	router.GET("/player/:suuid", func(c *gin.Context) {
-		_, all := Config.list()
-		sort.Strings(all)
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"port":     Config.Server.HTTPPort,
-			"suuid":    c.Param("suuid"),
-			"suuidMap": all,
-			"version":  time.Now().String(),
-		})
-	})
+	// router.LoadHTMLGlob("web/templates/*")
+	// router.GET("/", func(c *gin.Context) {
+	// 	fi, all := Config.list()
+	// 	sort.Strings(all)
+	// 	c.HTML(http.StatusOK, "index.tmpl", gin.H{
+	// 		"port":     Config.Server.HTTPPort,
+	// 		"suuid":    fi,
+	// 		"suuidMap": all,
+	// 		"version":  time.Now().String(),
+	// 	})
+	// })
+	// router.GET("/player/:suuid", func(c *gin.Context) {
+	// 	_, all := Config.list()
+	// 	sort.Strings(all)
+	// 	c.HTML(http.StatusOK, "index.tmpl", gin.H{
+	// 		"port":     Config.Server.HTTPPort,
+	// 		"suuid":    c.Param("suuid"),
+	// 		"suuidMap": all,
+	// 		"version":  time.Now().String(),
+	// 	})
+	// })
 	router.POST("/recive", reciver)
 	router.GET("/codec/:uuid", func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
@@ -59,7 +58,7 @@ func serveHTTP() {
 			}
 		}
 	})
-	router.StaticFS("/static", http.Dir("web/static"))
+	// router.StaticFS("/static", http.Dir("web/static"))
 	err := router.Run(Config.Server.HTTPPort)
 	if err != nil {
 		log.Fatalln("Start HTTP Server error", err)
@@ -127,10 +126,15 @@ func reciver(c *gin.Context) {
 		log.Println("Work payloadType", payloadType)
 		api := webrtc.NewAPI(webrtc.WithMediaEngine(mediaEngine))
 
+		var stun string
+		if stun = os.Getenv("MQTTURL"); stun == "" {
+			stun = defaultStun
+		}
+
 		peerConnection, err := api.NewPeerConnection(webrtc.Configuration{
 			ICEServers: []webrtc.ICEServer{
 				{
-					URLs: []string{"stun:stun.l.google.com:19302"},
+					URLs: []string{"stun:" + stun},
 				},
 			},
 		})

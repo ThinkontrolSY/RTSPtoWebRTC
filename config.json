@@ -3,8 +3,8 @@
     "http_port": ":8083"
   },
   "streams": {
-    "demo1": {
-      "url": "rtsp://171.25.232.15/f7404d80f4a14ffe93ba72c72523920d"
+    "测试": {
+      "url": "rtsp://admin:wzyc12345@10.45.14.202:554/cam/realmonitor?channel=139&subtype=1"
     }
   }
 }
