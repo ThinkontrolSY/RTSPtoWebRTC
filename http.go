@@ -40,6 +40,26 @@ func serveHTTP() {
 	// 		"version":  time.Now().String(),
 	// 	})
 	// })
+	router.GET("/stun", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		var stun string
+		if stun = os.Getenv("STUN"); stun == "" {
+			stun = defaultStun
+		}
+		dstun := struct {
+			Stun string `json:"stun"`
+		}{
+			Stun: stun,
+		}
+		b, err := json.Marshal(dstun)
+		if err == nil {
+			_, err = c.Writer.Write(b)
+			if err == nil {
+				log.Println("Write stun Info error", err)
+				return
+			}
+		}
+	})
 	router.POST("/recive", reciver)
 	router.GET("/codec/:uuid", func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
@@ -127,7 +147,7 @@ func reciver(c *gin.Context) {
 		api := webrtc.NewAPI(webrtc.WithMediaEngine(mediaEngine))
 
 		var stun string
-		if stun = os.Getenv("MQTTURL"); stun == "" {
+		if stun = os.Getenv("STUN"); stun == "" {
 			stun = defaultStun
 		}
 
