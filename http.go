@@ -167,12 +167,12 @@ func reciver(c *gin.Context) {
 			ADD KeepAlive Timer
 
 		*/
-		timer1 := time.NewTimer(time.Second * 2)
+		timer1 := time.NewTimer(time.Second * 10)
 		peerConnection.OnDataChannel(func(d *webrtc.DataChannel) {
 			// Register text message handling
 			d.OnMessage(func(msg webrtc.DataChannelMessage) {
 				//fmt.Printf("Message from DataChannel '%s': '%s'\n", d.Label(), string(msg.Data))
-				timer1.Reset(2 * time.Second)
+				timer1.Reset(10 * time.Second)
 			})
 		})
 		/*
@@ -271,7 +271,7 @@ func reciver(c *gin.Context) {
 					}()
 					var Vpre time.Duration
 					var start bool
-					timer1.Reset(5 * time.Second)
+					timer1.Reset(8 * time.Second)
 					for {
 						select {
 						case <-timer1.C:
