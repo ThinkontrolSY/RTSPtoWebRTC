@@ -21,6 +21,7 @@ const (
 )
 
 func main() {
+	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
 	go serveHTTP()
 	go serveStreams()
 	sigs := make(chan os.Signal, 1)
